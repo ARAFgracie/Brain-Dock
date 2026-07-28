@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — BrainDock</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { primary: '#2563EB', secondary: '#14B8A6', bg: '#F8FAFC', ink: '#0F172A', accent: '#F59E0B' },
+        fontFamily: { display: ['Poppins', 'sans-serif'], body: ['Inter', 'sans-serif'] },
+      },
+    },
+  }
+</script>
+<style>
+  body { background-color: #0F172A; }
+  .fade-in { opacity: 0; transform: translateY(12px); animation: fadeIn 0.5s ease forwards; }
+  @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+  .tab-btn.active { background-color: #2563EB; color: white; }
+  .shake { animation: shake 0.4s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
+  :focus-visible { outline: 2px solid #14B8A6; outline-offset: 2px; }
+  ::-webkit-scrollbar { height: 6px; width: 6px; }
+</style>
+</head>
+<body class="font-body text-ink antialiased">
+
+  <!-- ============ PASSCODE GATE ============ -->
+  <div id="passcodeGate" class="min-h-screen flex items-center justify-center px-6 bg-ink">
+    <div class="w-full max-w-sm fade-in">
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-8 text-center">
+        <div class="w-12 h-12 mx-auto rounded-full bg-slate-700 flex items-center justify-center mb-5">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14B8A6" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h1 class="font-display font-700 text-white text-lg mb-1">Restricted Access</h1>
+        <p class="text-slate-400 text-sm mb-6">Enter the admin passcode to continue.</p>
+        <input type="password" id="passcodeInput" placeholder="••••••••"
+          class="w-full text-center bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-secondary mb-4" />
+        <button id="passcodeSubmit" class="w-full bg-primary hover:bg-blue-700 text-white font-semibold text-sm py-3 rounded-full transition-colors">
+          Unlock
+        </button>
+        <p id="passcodeError" class="hidden text-red-400 text-xs mt-3">Access Denied. Incorrect passcode.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN DASHBOARD (hidden until unlocked) ============ -->
+  <div id="adminApp" class="hidden min-h-screen bg-bg text-ink">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 font-display font-700 text-lg">
+          <span>Brain<span class="text-primary">Dock</span></span>
+          <span class="text-xs font-medium bg-amber-50 text-accent px-2 py-0.5 rounded-full">Admin</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="dashboard.html" class="text-sm text-slate-500 hover:text-primary transition-colors">Back to site</a>
+          <button id="adminLogout" class="text-sm font-medium text-red-500 hover:underline">Exit admin</button>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 flex gap-1 overflow-x-auto">
+        <button data-tab="overview" class="tab-btn active px-4 py-2.5 text-sm font-medium rounded-t-lg">Overview</button>
+        <button data-tab="notes" class="tab-btn px-4 py-2.5 text-sm font-medium rounded-t-lg text-slate-500">Notes</button>
+        <button data-tab="users" class="tab-btn px-4 py-2.5 text-sm font-medium rounded-t-lg text-slate-500">Users</button>
+        <button data-tab="categories" class="tab-btn px-4 py-2.5 text-sm font-medium rounded-t-lg text-slate-500">Categories</button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+      <!-- ---------- OVERVIEW ---------- -->
+      <section data-panel="overview">
+        <h2 class="font-display font-700 text-xl mb-6">Dashboard Overview</h2>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="statsGrid">
+          <div class="bg-white border border-slate-200 rounded-2xl p-5">
+            <p class="text-xs text-slate-400 mb-1">Total Users</p>
+            <p class="font-display font-700 text-2xl" id="statUsers">—</p>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-2xl p-5">
+            <p class="text-xs text-slate-400 mb-1">Total Notes</p>
+            <p class="font-display font-700 text-2xl" id="statNotes">—</p>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-2xl p-5">
+            <p class="text-xs text-slate-400 mb-1">Total Downloads</p>
+            <p class="font-display font-700 text-2xl" id="statDownloads">—</p>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-2xl p-5">
+            <p class="text-xs text-slate-400 mb-1">Total Likes</p>
+            <p class="font-display font-700 text-2xl" id="statLikes">—</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 mt-8">
+          <div class="bg-white border border-slate-200 rounded-2xl p-5">
+            <h3 class="font-display font-600 mb-4 text-sm">Most Downloaded</h3>
+            <div id="mostDownloaded" class="space-y-3 text-sm"></div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-2xl p-5">
+            <h3 class="font-display font-600 mb-4 text-sm">Most Liked</h3>
+            <div id="mostLiked" class="space-y-3 text-sm"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- NOTES MANAGEMENT ---------- -->
+      <section data-panel="notes" class="hidden">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-display font-700 text-xl">Notes Management</h2>
+          <button id="addNoteBtn" class="bg-primary hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors">+ Add New Note</button>
+        </div>
+
+        <!-- Add/Edit form -->
+        <div id="noteForm" class="hidden bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+          <h3 class="font-display font-600 mb-4" id="noteFormTitle">Add New Note</h3>
+          <input type="hidden" id="noteId" />
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Title</label>
+              <input id="noteTitle" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Subject</label>
+              <select id="noteSubject" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm"></select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-medium text-slate-600 mb-1">Keywords (comma separated)</label>
+              <input id="noteKeywords" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm" placeholder="optics, waves, physics" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-medium text-slate-600 mb-1">Description</label>
+              <textarea id="noteDescription" rows="3" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Upload Thumbnail</label>
+              <input type="file" id="noteThumbnailFile" accept="image/*" class="w-full text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Upload PDF</label>
+              <input type="file" id="notePdfFile" accept="application/pdf" class="w-full text-sm" />
+            </div>
+          </div>
+          <div class="flex items-center gap-3 mt-5">
+            <button id="saveNoteBtn" class="bg-primary hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors">Submit</button>
+            <button id="cancelNoteBtn" class="text-sm text-slate-500 hover:text-ink">Cancel</button>
+            <span id="noteFormStatus" class="text-xs text-slate-400"></span>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+              <tr>
+                <th class="text-left px-4 py-3">Title</th>
+                <th class="text-left px-4 py-3">Subject</th>
+                <th class="text-left px-4 py-3">Downloads</th>
+                <th class="text-left px-4 py-3">Likes</th>
+                <th class="text-left px-4 py-3">Status</th>
+                <th class="text-left px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="notesTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ---------- USERS ---------- -->
+      <section data-panel="users" class="hidden">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-display font-700 text-xl">Users</h2>
+          <input type="text" id="userSearchInput" placeholder="Search users…" class="border border-slate-200 rounded-full px-4 py-2 text-sm w-64" />
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+              <tr>
+                <th class="text-left px-4 py-3">Name</th>
+                <th class="text-left px-4 py-3">Joined</th>
+                <th class="text-left px-4 py-3">Status</th>
+                <th class="text-left px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ---------- CATEGORIES ---------- -->
+      <section data-panel="categories" class="hidden">
+        <h2 class="font-display font-700 text-xl mb-2">Categories</h2>
+        <p class="text-sm text-slate-500 mb-6">Subjects are currently a fixed list defined in the app. Reordering/custom subjects can be added in a future update without breaking existing notes.</p>
+        <div class="flex flex-wrap gap-2" id="categoriesList"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="js/supabase.js"></script>
+  <script>
+    const SUBJECTS = ['Bangla','English','Mathematics','Physics','Chemistry','Biology','ICT','Accounting','Finance','Marketing','Programming','Engineering','Medical','Admission'];
+    const ADMIN_PASSCODE = 'devaraf.733'; // TODO: move to env var in production
+
+    // ---------- PASSCODE GATE ----------
+    const gate = document.getElementById('passcodeGate');
+    const app = document.getElementById('adminApp');
+    const passInput = document.getElementById('passcodeInput');
+    const passError = document.getElementById('passcodeError');
+
+    async function attemptUnlock() {
+      if (passInput.value === ADMIN_PASSCODE) {
+        // Also verify the logged-in user is actually an admin in the DB (real protection layer)
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+          passError.textContent = 'Please log in to your account first.';
+          passError.classList.remove('hidden');
+          return;
+        }
+        const { data: profile } = await supabaseClient.from('profiles').select('is_admin').eq('id', session.user.id).single();
+        if (!profile?.is_admin) {
+          passError.textContent = 'Access Denied. Your account is not an admin.';
+          passError.classList.remove('hidden');
+          gate.querySelector('.bg-slate-800').classList.add('shake');
+          return;
+        }
+        gate.classList.add('hidden');
+        app.classList.remove('hidden');
+        initAdminApp();
+      } else {
+        passError.textContent = 'Access Denied. Incorrect passcode.';
+        passError.classList.remove('hidden');
+        gate.querySelector('.bg-slate-800').classList.add('shake');
+        setTimeout(() => gate.querySelector('.bg-slate-800').classList.remove('shake'), 400);
+      }
+    }
+    document.getElementById('passcodeSubmit').addEventListener('click', attemptUnlock);
+    passInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptUnlock(); });
+
+    document.getElementById('adminLogout').addEventListener('click', () => {
+      app.classList.add('hidden');
+      gate.classList.remove('hidden');
+      passInput.value = '';
+    });
+
+    // ---------- TABS ----------
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-slate-500'); });
+        btn.classList.add('active'); btn.classList.remove('text-slate-500');
+        document.querySelectorAll('[data-panel]').forEach(p => p.classList.add('hidden'));
+        document.querySelector(`[data-panel="${btn.dataset.tab}"]`).classList.remove('hidden');
+      });
+    });
+
+    // ---------- INIT ----------
+    function initAdminApp() {
+      loadOverview();
+      loadNotesTable();
+      loadUsersTable();
+      populateSubjectSelect();
+      renderCategoriesList();
+    }
+
+    function populateSubjectSelect() {
+      const sel = document.getElementById('noteSubject');
+      sel.innerHTML = SUBJECTS.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+    function renderCategoriesList() {
+      document.getElementById('categoriesList').innerHTML = SUBJECTS.map(s =>
+        `<span class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm">${s}</span>`
+      ).join('');
+    }
+
+    // ---------- OVERVIEW ----------
+    async function loadOverview() {
+      const { count: userCount } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true });
+      const { count: noteCount } = await supabaseClient.from('notes').select('*', { count: 'exact', head: true });
+      const { data: notes } = await supabaseClient.from('notes').select('downloads, likes_count, title');
+
+      const totalDownloads = (notes || []).reduce((sum, n) => sum + (n.downloads || 0), 0);
+      const totalLikes = (notes || []).reduce((sum, n) => sum + (n.likes_count || 0), 0);
+
+      document.getElementById('statUsers').textContent = userCount ?? 0;
+      document.getElementById('statNotes').textContent = noteCount ?? 0;
+      document.getElementById('statDownloads').textContent = totalDownloads;
+      document.getElementById('statLikes').textContent = totalLikes;
+
+      const topDownloaded = [...(notes || [])].sort((a,b) => b.downloads - a.downloads).slice(0,5);
+      const topLiked = [...(notes || [])].sort((a,b) => b.likes_count - a.likes_count).slice(0,5);
+
+      document.getElementById('mostDownloaded').innerHTML = topDownloaded.map(n =>
+        `<div class="flex justify-between"><span class="truncate pr-2">${escapeHtml(n.title)}</span><span class="text-slate-400 shrink-0">${n.downloads}</span></div>`
+      ).join('') || '<p class="text-slate-400">No data yet.</p>';
+
+      document.getElementById('mostLiked').innerHTML = topLiked.map(n =>
+        `<div class="flex justify-between"><span class="truncate pr-2">${escapeHtml(n.title)}</span><span class="text-slate-400 shrink-0">${n.likes_count}</span></div>`
+      ).join('') || '<p class="text-slate-400">No data yet.</p>';
+    }
+
+    // ---------- NOTES TABLE ----------
+    async function loadNotesTable() {
+      const { data: notes } = await supabaseClient.from('notes').select('*').order('created_at', { ascending: false });
+      const tbody = document.getElementById('notesTableBody');
+      tbody.innerHTML = (notes || []).map(n => `
+        <tr class="border-t border-slate-100">
+          <td class="px-4 py-3">${escapeHtml(n.title)}</td>
+          <td class="px-4 py-3">${escapeHtml(n.subject)}</td>
+          <td class="px-4 py-3">${n.downloads}</td>
+          <td class="px-4 py-3">${n.likes_count}</td>
+          <td class="px-4 py-3">
+            <span class="text-xs px-2 py-1 rounded-full ${n.is_hidden ? 'bg-slate-100 text-slate-500' : 'bg-teal-50 text-secondary'}">
+              ${n.is_hidden ? 'Hidden' : 'Published'}
+            </span>
+          </td>
+          <td class="px-4 py-3 space-x-2 whitespace-nowrap">
+            <button class="text-primary hover:underline text-xs" onclick="editNote('${n.id}')">Edit</button>
+            <button class="text-slate-500 hover:underline text-xs" onclick="toggleHideNote('${n.id}', ${n.is_hidden})">${n.is_hidden ? 'Publish' : 'Hide'}</button>
+            <button class="text-red-500 hover:underline text-xs" onclick="deleteNote('${n.id}')">Delete</button>
+          </td>
+        </tr>
+      `).join('') || '<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No notes yet.</td></tr>';
+    }
+
+    let notesCache = [];
+    async function editNote(id) {
+      const { data: n } = await supabaseClient.from('notes').select('*').eq('id', id).single();
+      if (!n) return;
+      document.getElementById('noteFormTitle').textContent = 'Edit Note';
+      document.getElementById('noteId').value = n.id;
+      document.getElementById('noteTitle').value = n.title;
+      document.getElementById('noteSubject').value = n.subject;
+      document.getElementById('noteKeywords').value = (n.keywords || []).join(', ');
+      document.getElementById('noteDescription').value = n.description || '';
+      document.getElementById('noteForm').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function toggleHideNote(id, currentlyHidden) {
+      await supabaseClient.from('notes').update({ is_hidden: !currentlyHidden }).eq('id', id);
+      loadNotesTable();
+    }
+
+    async function deleteNote(id) {
+      if (!confirm('Delete this note permanently? This cannot be undone.')) return;
+      await supabaseClient.from('notes').delete().eq('id', id);
+      loadNotesTable();
+      loadOverview();
+    }
+
+    document.getElementById('addNoteBtn').addEventListener('click', () => {
+      document.getElementById('noteFormTitle').textContent = 'Add New Note';
+      document.getElementById('noteId').value = '';
+      document.getElementById('noteTitle').value = '';
+      document.getElementById('noteKeywords').value = '';
+      document.getElementById('noteDescription').value = '';
+      document.getElementById('noteForm').classList.remove('hidden');
+    });
+    document.getElementById('cancelNoteBtn').addEventListener('click', () => {
+      document.getElementById('noteForm').classList.add('hidden');
+    });
+
+    document.getElementById('saveNoteBtn').addEventListener('click', async () => {
+      const statusEl = document.getElementById('noteFormStatus');
+      statusEl.textContent = 'Saving…';
+
+      const id = document.getElementById('noteId').value;
+      const title = document.getElementById('noteTitle').value.trim();
+      const subject = document.getElementById('noteSubject').value;
+      const keywords = document.getElementById('noteKeywords').value.split(',').map(k => k.trim()).filter(Boolean);
+      const description = document.getElementById('noteDescription').value.trim();
+      const thumbFile = document.getElementById('noteThumbnailFile').files[0];
+      const pdfFile = document.getElementById('notePdfFile').files[0];
+
+      if (!title) { statusEl.textContent = 'Title is required.'; return; }
+
+      let thumbnail_url = null;
+      let pdf_url = null;
+      let file_size_kb = null;
+
+      if (thumbFile) {
+        const path = `${Date.now()}-${thumbFile.name}`;
+        const { error: upErr } = await supabaseClient.storage.from('thumbnails').upload(path, thumbFile, { upsert: true });
+        if (!upErr) {
+          const { data: pub } = supabaseClient.storage.from('thumbnails').getPublicUrl(path);
+          thumbnail_url = pub.publicUrl;
+        }
+      }
+      if (pdfFile) {
+        const path = `${subject}/${Date.now()}-${pdfFile.name}`;
+        const { error: upErr } = await supabaseClient.storage.from('pdfs').upload(path, pdfFile, { upsert: true });
+        if (!upErr) {
+          pdf_url = path; // store the object path, not a public URL — bucket is private
+          file_size_kb = Math.round(pdfFile.size / 1024);
+        }
+      }
+
+      const payload = { title, subject, keywords, description };
+      if (thumbnail_url) payload.thumbnail_url = thumbnail_url;
+      if (pdf_url) payload.pdf_url = pdf_url;
+      if (file_size_kb) payload.file_size_kb = file_size_kb;
+
+      let error;
+      if (id) {
+        ({ error } = await supabaseClient.from('notes').update(payload).eq('id', id));
+      } else {
+        if (!pdf_url) { statusEl.textContent = 'A PDF file is required for new notes.'; return; }
+        ({ error } = await supabaseClient.from('notes').insert(payload));
+      }
+
+      if (error) {
+        statusEl.textContent = 'Error: ' + error.message;
+        return;
+      }
+
+      statusEl.textContent = 'Saved!';
+      setTimeout(() => {
+        document.getElementById('noteForm').classList.add('hidden');
+        statusEl.textContent = '';
+        loadNotesTable();
+        loadOverview();
+      }, 700);
+    });
+
+    // ---------- USERS TABLE ----------
+    async function loadUsersTable(filter = '') {
+      let query = supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
+      if (filter) query = query.ilike('full_name', `%${filter}%`);
+      const { data: users } = await query;
+
+      document.getElementById('usersTableBody').innerHTML = (users || []).map(u => `
+        <tr class="border-t border-slate-100">
+          <td class="px-4 py-3">${escapeHtml(u.full_name)}</td>
+          <td class="px-4 py-3">${new Date(u.created_at).toLocaleDateString('en-GB')}</td>
+          <td class="px-4 py-3">
+            <span class="text-xs px-2 py-1 rounded-full ${u.is_suspended ? 'bg-red-50 text-red-500' : 'bg-teal-50 text-secondary'}">
+              ${u.is_suspended ? 'Suspended' : 'Active'}
+            </span>
+          </td>
+          <td class="px-4 py-3 space-x-2 whitespace-nowrap">
+            <button class="text-primary hover:underline text-xs" onclick="toggleSuspend('${u.id}', ${u.is_suspended})">${u.is_suspended ? 'Unsuspend' : 'Suspend'}</button>
+            <button class="text-red-500 hover:underline text-xs" onclick="deleteUser('${u.id}')">Delete</button>
+          </td>
+        </tr>
+      `).join('') || '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No users found.</td></tr>';
+    }
+
+    document.getElementById('userSearchInput').addEventListener('input', (e) => loadUsersTable(e.target.value.trim()));
+
+    async function toggleSuspend(id, currentlySuspended) {
+      await supabaseClient.from('profiles').update({ is_suspended: !currentlySuspended }).eq('id', id);
+      loadUsersTable();
+    }
+    async function deleteUser(id) {
+      if (!confirm('Delete this user profile? Their auth account will remain but app access will break.')) return;
+      await supabaseClient.from('profiles').delete().eq('id', id);
+      loadUsersTable();
+      loadOverview();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
