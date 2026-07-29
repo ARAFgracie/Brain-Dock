@@ -126,11 +126,11 @@
       submitText.textContent = isLoading ? 'Logging in…' : 'Log in';
     }
 
-    // If already logged in, skip straight to dashboard
-    (async () => {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (session) window.location.href = 'dashboard.html';
-    })();
+    // Note: we intentionally do NOT auto-redirect already-logged-in users away from
+    // this page. Doing so previously trapped the browser Back button in a loop
+    // (dashboard -> back -> login -> auto-forward -> dashboard), making it impossible
+    // to navigate back to earlier pages like index.html.
+
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
