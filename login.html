@@ -105,7 +105,12 @@
     </div>
   </div>
 
-  <script src="js/supabase.js"></script>
+  <script>
+    // BrainDock — Supabase client config (inlined so it never depends on a separate file/folder upload)
+    const SUPABASE_URL = 'https://hdfphesajupqphnbmjod.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_NVkl8mcfd5Qxow-9t39sPA_OPQAcEQo';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  </script>
   <script>
     const form = document.getElementById('loginForm');
     const alertBox = document.getElementById('alertBox');
