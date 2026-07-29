@@ -151,7 +151,14 @@
       setLoading(false);
 
       if (error) {
-        showAlert('Incorrect email or password. Please try again.', 'error');
+        const msg = error.message?.toLowerCase() || '';
+        if (msg.includes('email not confirmed')) {
+          showAlert('Your email is not confirmed yet. Please check your inbox for the confirmation link (or ask the admin to disable email confirmation for testing).', 'error');
+        } else if (msg.includes('invalid login credentials')) {
+          showAlert('Incorrect email or password. Please try again.', 'error');
+        } else {
+          showAlert(error.message, 'error');
+        }
         return;
       }
 
