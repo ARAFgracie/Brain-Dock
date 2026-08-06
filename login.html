@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Log In — BrainDock</title>
-<meta name="description" content="Log in to your BrainDock account to browse and download study notes.">
+<title>Continue — BrainDock</title>
+<meta name="description" content="Enter your phone number to continue to BrainDock.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -13,45 +13,30 @@
   tailwind.config = {
     theme: {
       extend: {
-        colors: {
-          primary: '#2563EB',
-          secondary: '#14B8A6',
-          bg: '#F8FAFC',
-          ink: '#0F172A',
-          accent: '#F59E0B',
-        },
-        fontFamily: {
-          display: ['Poppins', 'sans-serif'],
-          body: ['Inter', 'sans-serif'],
-        },
+        colors: { primary: '#2563EB', secondary: '#14B8A6', bg: '#F8FAFC', ink: '#0F172A', accent: '#F59E0B' },
+        fontFamily: { display: ['Poppins', 'sans-serif'], body: ['Inter', 'sans-serif'] },
       },
     },
   }
 </script>
 <style>
   body { background-color: #F8FAFC; }
-  .fade-in {
-    opacity: 0;
-    transform: translateY(16px);
-    animation: fadeIn 0.6s ease forwards;
-  }
+  .fade-in { opacity: 0; transform: translateY(16px); animation: fadeIn 0.6s ease forwards; }
   @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-
   .anchor-cta .anchor-icon { transition: transform 0.4s cubic-bezier(.34,1.56,.64,1); }
   .anchor-cta:hover .anchor-icon { transform: translateY(3px) rotate(-8deg); }
   .anchor-cta:disabled { opacity: 0.6; cursor: not-allowed; }
-
-  input:focus { outline: none; }
+  input:focus, select:focus { outline: none; }
   .field-wrap:focus-within { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
   .field-wrap { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-
+  .option-card { transition: all 0.15s ease; cursor: pointer; }
+  .option-card.selected { border-color: #2563EB; background: #EFF6FF; }
   :focus-visible { outline: 2px solid #14B8A6; outline-offset: 2px; }
 </style>
 </head>
 <body class="font-body text-ink antialiased min-h-screen flex items-center justify-center px-6 py-12">
 
   <div class="w-full max-w-md fade-in">
-    <!-- Logo -->
     <a href="index.html" class="flex items-center justify-center gap-2 font-display font-700 text-2xl mb-8">
       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 2V8" stroke="#2563EB" stroke-width="2" stroke-linecap="round"/>
@@ -63,30 +48,27 @@
     </a>
 
     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-8">
-      <h1 class="font-display font-700 text-2xl text-ink mb-1">Welcome back</h1>
-      <p class="text-sm text-slate-500 mb-6">Log in to keep exploring your notes.</p>
 
-      <div id="alertBox" class="hidden mb-4 text-sm px-4 py-3 rounded-xl"></div>
+      <!-- STEP 1: phone number -->
+      <div id="stepPhone">
+        <h1 class="font-display font-700 text-2xl text-ink mb-1">Continue with your number</h1>
+        <p class="text-sm text-slate-500 mb-6">No password needed — just your phone number.</p>
 
-      <form id="loginForm" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-          <div class="field-wrap border border-slate-200 rounded-xl px-4 py-3">
-            <input type="email" id="email" required placeholder="you@example.com"
-              class="w-full text-sm bg-transparent placeholder:text-slate-400" />
-          </div>
+        <div id="alertBoxPhone" class="hidden mb-4 text-sm px-4 py-3 rounded-xl"></div>
+
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">Phone Number</label>
+        <div class="field-wrap border border-slate-200 rounded-xl px-4 py-3 mb-4">
+          <input type="tel" id="phoneInput" inputmode="numeric" placeholder="01XXXXXXXXX"
+            class="w-full text-sm bg-transparent placeholder:text-slate-400" />
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
-          <div class="field-wrap border border-slate-200 rounded-xl px-4 py-3">
-            <input type="password" id="password" required placeholder="Your password"
-              class="w-full text-sm bg-transparent placeholder:text-slate-400" />
-          </div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+        <div class="field-wrap border border-slate-200 rounded-xl px-4 py-3 mb-4">
+          <input type="email" id="emailInput" placeholder="you@example.com"
+            class="w-full text-sm bg-transparent placeholder:text-slate-400" />
         </div>
 
-        <button type="submit" id="submitBtn"
-          class="anchor-cta w-full flex items-center justify-center gap-2 bg-primary hover:bg-blue-700 text-white font-semibold text-sm py-3.5 rounded-full transition-colors mt-2">
+        <button id="phoneContinueBtn" class="anchor-cta w-full flex items-center justify-center gap-2 bg-primary hover:bg-blue-700 text-white font-semibold text-sm py-3.5 rounded-full transition-colors">
           <svg class="anchor-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="12" cy="5" r="2" stroke="white" stroke-width="2"/>
             <path d="M12 7V19" stroke="white" stroke-width="2"/>
@@ -94,14 +76,45 @@
             <path d="M3 12H6" stroke="white" stroke-width="2" stroke-linecap="round"/>
             <path d="M18 12H21" stroke="white" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <span id="submitText">Log in</span>
+          <span id="phoneContinueText">Continue</span>
         </button>
-      </form>
+      </div>
 
-      <p class="text-center text-sm text-slate-500 mt-6">
-        Don't have an account?
-        <a href="signup.html" class="text-primary font-semibold hover:underline">Sign up free</a>
-      </p>
+      <!-- STEP 2: new number — collect class + gender -->
+      <div id="stepDetails" class="hidden">
+        <h1 class="font-display font-700 text-2xl text-ink mb-1">Just a couple more details</h1>
+        <p class="text-sm text-slate-500 mb-6">This number is new to us — tell us a bit about you.</p>
+
+        <div id="alertBoxDetails" class="hidden mb-4 text-sm px-4 py-3 rounded-xl"></div>
+
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
+        <div class="field-wrap border border-slate-200 rounded-xl px-4 py-3 mb-5">
+          <input type="text" id="nameInput" placeholder="Your full name"
+            class="w-full text-sm bg-transparent placeholder:text-slate-400" />
+        </div>
+
+        <label class="block text-sm font-medium text-slate-700 mb-2">Class</label>
+        <div id="classGrid" class="grid grid-cols-3 gap-2 mb-5"></div>
+
+        <label class="block text-sm font-medium text-slate-700 mb-2">Gender</label>
+        <div id="genderGrid" class="grid grid-cols-2 gap-2 mb-6"></div>
+
+        <button id="createAccountBtn" class="anchor-cta w-full flex items-center justify-center gap-2 bg-primary hover:bg-blue-700 text-white font-semibold text-sm py-3.5 rounded-full transition-colors">
+          <svg class="anchor-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="5" r="2" stroke="white" stroke-width="2"/>
+            <path d="M12 7V19" stroke="white" stroke-width="2"/>
+            <path d="M6 12C6 12 7 18 12 18C17 18 18 12 18 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 12H6" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <path d="M18 12H21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span id="createAccountText">Create account</span>
+        </button>
+
+        <button id="backToPhoneBtn" class="w-full text-center text-sm text-slate-400 hover:text-slate-600 mt-3">
+          ← Use a different number
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -112,71 +125,163 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
   </script>
   <script>
-    const form = document.getElementById('loginForm');
-    const alertBox = document.getElementById('alertBox');
-    const submitBtn = document.getElementById('submitBtn');
-    const submitText = document.getElementById('submitText');
+    const CLASSES = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'HSC 1st Year', 'HSC 2nd Year', 'Admission', 'University'];
+    const GENDERS = ['Male', 'Female'];
 
-    function showAlert(message, type) {
-      alertBox.textContent = message;
-      alertBox.className = 'mb-4 text-sm px-4 py-3 rounded-xl ' +
+    let selectedClass = null;
+    let selectedGender = null;
+    let pendingDigits = null; // holds the normalized phone while on step 2
+    let pendingEmail = null;  // holds the entered email while on step 2
+
+    // If already logged in, skip straight to dashboard
+    (async () => {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) window.location.href = 'dashboard.html';
+    })();
+
+    function normalizePhone(raw) {
+      return raw.replace(/\D/g, ''); // digits only
+    }
+    function credentialsFor(digits) {
+      return {
+        email: `p${digits}@braindock.internal`,
+        password: `BD-${digits}-lock`,
+      };
+    }
+
+    function showAlert(boxId, message, type) {
+      const box = document.getElementById(boxId);
+      box.textContent = message;
+      box.className = 'mb-4 text-sm px-4 py-3 rounded-xl ' +
         (type === 'error'
           ? 'bg-red-50 text-red-600 border border-red-100'
           : 'bg-teal-50 text-secondary border border-teal-100');
-      alertBox.classList.remove('hidden');
+      box.classList.remove('hidden');
     }
 
-    function setLoading(isLoading) {
-      submitBtn.disabled = isLoading;
-      submitText.textContent = isLoading ? 'Logging in…' : 'Log in';
+    // ---------- STEP 1: phone continue ----------
+    const phoneInput = document.getElementById('phoneInput');
+    const emailInput = document.getElementById('emailInput');
+    const phoneContinueBtn = document.getElementById('phoneContinueBtn');
+    const phoneContinueText = document.getElementById('phoneContinueText');
+
+    function isValidEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     }
 
-    // Note: we intentionally do NOT auto-redirect already-logged-in users away from
-    // this page. Doing so previously trapped the browser Back button in a loop
-    // (dashboard -> back -> login -> auto-forward -> dashboard), making it impossible
-    // to navigate back to earlier pages like index.html.
+    async function handlePhoneContinue() {
+      document.getElementById('alertBoxPhone').classList.add('hidden');
+      const digits = normalizePhone(phoneInput.value);
+      const emailValue = emailInput.value.trim();
 
+      if (digits.length < 10) {
+        showAlert('alertBoxPhone', 'Please enter a valid phone number.', 'error');
+        return;
+      }
+      if (!isValidEmail(emailValue)) {
+        showAlert('alertBoxPhone', 'Please enter a valid email address.', 'error');
+        return;
+      }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      alertBox.classList.add('hidden');
+      phoneContinueBtn.disabled = true;
+      phoneContinueText.textContent = 'Checking…';
 
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-
-      setLoading(true);
-
+      const { email, password } = credentialsFor(digits);
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-      setLoading(false);
+      phoneContinueBtn.disabled = false;
+      phoneContinueText.textContent = 'Continue';
+
+      if (!error && data.session) {
+        // Number already registered — straight to dashboard
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      const msg = error?.message?.toLowerCase() || '';
+      if (msg.includes('invalid login credentials')) {
+        // Number not registered yet — collect name, class, gender
+        pendingDigits = digits;
+        pendingEmail = emailValue;
+        document.getElementById('stepPhone').classList.add('hidden');
+        document.getElementById('stepDetails').classList.remove('hidden');
+      } else {
+        showAlert('alertBoxPhone', error?.message || 'Something went wrong. Please try again.', 'error');
+      }
+    }
+    phoneContinueBtn.addEventListener('click', handlePhoneContinue);
+    phoneInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handlePhoneContinue(); });
+
+    // ---------- STEP 2: class + gender selection ----------
+    const classGrid = document.getElementById('classGrid');
+    CLASSES.forEach(c => {
+      const el = document.createElement('div');
+      el.className = 'option-card border border-slate-200 rounded-xl text-center text-xs font-medium py-2.5 px-1';
+      el.textContent = c;
+      el.addEventListener('click', () => {
+        document.querySelectorAll('#classGrid .option-card').forEach(x => x.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedClass = c;
+      });
+      classGrid.appendChild(el);
+    });
+
+    const genderGrid = document.getElementById('genderGrid');
+    GENDERS.forEach(g => {
+      const el = document.createElement('div');
+      el.className = 'option-card border border-slate-200 rounded-xl text-center text-sm font-medium py-3';
+      el.textContent = g;
+      el.addEventListener('click', () => {
+        document.querySelectorAll('#genderGrid .option-card').forEach(x => x.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedGender = g;
+      });
+      genderGrid.appendChild(el);
+    });
+
+    document.getElementById('backToPhoneBtn').addEventListener('click', () => {
+      document.getElementById('stepDetails').classList.add('hidden');
+      document.getElementById('stepPhone').classList.remove('hidden');
+      pendingDigits = null;
+      pendingEmail = null;
+      selectedClass = null;
+      selectedGender = null;
+    });
+
+    const createAccountBtn = document.getElementById('createAccountBtn');
+    const createAccountText = document.getElementById('createAccountText');
+
+    createAccountBtn.addEventListener('click', async () => {
+      document.getElementById('alertBoxDetails').classList.add('hidden');
+
+      const nameValue = document.getElementById('nameInput').value.trim();
+      if (!nameValue) { showAlert('alertBoxDetails', 'Please enter your full name.', 'error'); return; }
+      if (!selectedClass) { showAlert('alertBoxDetails', 'Please select your class.', 'error'); return; }
+      if (!selectedGender) { showAlert('alertBoxDetails', 'Please select your gender.', 'error'); return; }
+
+      createAccountBtn.disabled = true;
+      createAccountText.textContent = 'Creating account…';
+
+      const { email, password } = credentialsFor(pendingDigits);
+      const { data, error } = await supabaseClient.auth.signUp({
+        email, password,
+        options: { data: { phone: pendingDigits, class: selectedClass, gender: selectedGender, full_name: nameValue, contact_email: pendingEmail } }
+      });
+
+      createAccountBtn.disabled = false;
+      createAccountText.textContent = 'Create account';
 
       if (error) {
-        const msg = error.message?.toLowerCase() || '';
-        if (msg.includes('email not confirmed')) {
-          showAlert('Your email is not confirmed yet. Please check your inbox for the confirmation link (or ask the admin to disable email confirmation for testing).', 'error');
-        } else if (msg.includes('invalid login credentials')) {
-          showAlert('Incorrect email or password. Please try again.', 'error');
-        } else {
-          showAlert(error.message, 'error');
-        }
+        showAlert('alertBoxDetails', error.message, 'error');
         return;
       }
 
-      // Block suspended users even if credentials are correct
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('is_suspended')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profile && profile.is_suspended) {
-        await supabaseClient.auth.signOut();
-        showAlert('This account has been suspended. Contact support for help.', 'error');
-        return;
+      if (data.session) {
+        window.location.href = 'dashboard.html';
+      } else {
+        // Only reachable if "Confirm email" is still enabled in Supabase settings
+        showAlert('alertBoxDetails', 'Account created! Please disable "Confirm email" in Supabase → Authentication → Sign In / Providers → Email for instant access.', 'success');
       }
-
-      showAlert('Logged in! Redirecting…', 'success');
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
     });
   </script>
 </body>
