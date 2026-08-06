@@ -38,20 +38,19 @@
 
   :focus-visible { outline: 2px solid #14B8A6; outline-offset: 2px; }
 
-  /* Sidebar collapse/expand (desktop only) */
+  /* Sidebar as an overlay drawer (desktop only) — never pushes/compresses page content */
   @media (min-width: 768px) {
-    #sidebarAside { transition: transform 0.28s ease; }
-    #sidebarAside.sidebar-collapsed { transform: translateX(-100%); }
-    #desktopTopBar, #mainContent { transition: padding-left 0.28s ease; }
-    #desktopTopBar.sidebar-collapsed, #mainContent.sidebar-collapsed { padding-left: 0 !important; }
-    #sidebarRevealBtn.visible { display: flex; }
+    #sidebarAside { transition: transform 0.28s ease; transform: translateX(-100%); z-index: 60; }
+    #sidebarAside.sidebar-open { transform: translateX(0); }
+    #sidebarBackdrop { transition: opacity 0.28s ease; opacity: 0; pointer-events: none; z-index: 55; }
+    #sidebarBackdrop.visible { opacity: 1; pointer-events: auto; }
   }
 </style>
 </head>
 <body class="font-body text-ink antialiased">
 
-  <!-- ============ DESKTOP SIDEBAR ============ -->
-  <aside id="sidebarAside" class="hidden md:flex md:flex-col md:w-60 md:fixed md:inset-y-0 md:left-0 bg-white border-r border-slate-200 z-40">
+  <!-- ============ DESKTOP SIDEBAR (overlay drawer) ============ -->
+  <aside id="sidebarAside" class="hidden md:flex md:flex-col md:w-60 md:fixed md:inset-y-0 md:left-0 bg-white border-r border-slate-200 shadow-xl">
     <div class="flex items-center justify-between px-6 py-6">
       <a href="dashboard.html" class="flex items-center gap-2 font-display font-700 text-lg">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -62,7 +61,7 @@
         </svg>
         <span>Brain<span class="text-primary">Dock</span></span>
       </a>
-      <button id="sidebarCollapseBtn" title="Collapse sidebar" aria-label="Collapse sidebar"
+      <button id="sidebarCollapseBtn" title="Close menu" aria-label="Close menu"
         class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-ink transition-colors shrink-0">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
       </button>
@@ -104,11 +103,8 @@
     </div>
   </aside>
 
-  <!-- Floating reveal button — shown only when sidebar is collapsed (desktop only) -->
-  <button id="sidebarRevealBtn" title="Show sidebar" aria-label="Show sidebar"
-    class="hidden md:hidden fixed top-4 left-4 z-50 w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm items-center justify-center text-slate-500 hover:text-primary hover:border-primary transition-colors">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
-  </button>
+  <!-- Backdrop shown behind the sidebar drawer when open (desktop only) -->
+  <div id="sidebarBackdrop" class="hidden md:block fixed inset-0 bg-ink/30"></div>
 
   <!-- ============ MOBILE TOP BAR ============ -->
   <header class="sticky top-0 z-40 bg-bg/90 backdrop-blur border-b border-slate-200 md:hidden">
@@ -166,9 +162,13 @@
     </div>
   </div>
 
-  <!-- ============ DESKTOP TOP BAR (search only — nav lives in sidebar) ============ -->
-  <header id="desktopTopBar" class="hidden md:flex sticky top-0 z-30 bg-bg/90 backdrop-blur border-b border-slate-200 md:pl-60">
-    <div class="w-full px-6 py-4 flex items-center justify-between gap-4">
+  <!-- ============ DESKTOP TOP BAR (menu toggle + search — sidebar is now an overlay drawer) ============ -->
+  <header id="desktopTopBar" class="hidden md:flex sticky top-0 z-30 bg-bg/90 backdrop-blur border-b border-slate-200">
+    <div class="w-full px-6 py-4 flex items-center gap-4">
+      <button id="sidebarOpenBtn" title="Open menu" aria-label="Open menu"
+        class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary transition-colors shrink-0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+      </button>
       <div class="max-w-lg flex-1 relative">
         <svg class="absolute left-4 top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
         <input type="text" id="searchInput" placeholder="Search notes, subject, keywords…"
@@ -177,7 +177,7 @@
     </div>
   </header>
 
-  <main id="mainContent" class="md:pl-60 max-w-7xl mx-auto px-6 py-8 pb-24 md:pb-8">
+  <main id="mainContent" class="max-w-7xl mx-auto px-6 py-8 pb-24 md:pb-8">
 
     <!-- ============ WELCOME ============ -->
     <section class="fade-in mb-10">
@@ -245,25 +245,22 @@
     const SIDEBAR_KEY = 'bd_sidebar_collapsed';
 
     function applySidebarState() {
-      const collapsed = localStorage.getItem(SIDEBAR_KEY) === 'true';
-      document.getElementById('sidebarAside').classList.toggle('sidebar-collapsed', collapsed);
-      document.getElementById('desktopTopBar').classList.toggle('sidebar-collapsed', collapsed);
-      document.getElementById('mainContent').classList.toggle('sidebar-collapsed', collapsed);
-      const revealBtn = document.getElementById('sidebarRevealBtn');
-      revealBtn.classList.toggle('visible', collapsed);
-      revealBtn.classList.toggle('hidden', !collapsed);
+      const open = localStorage.getItem(SIDEBAR_KEY) === 'open';
+      document.getElementById('sidebarAside').classList.toggle('sidebar-open', open);
+      document.getElementById('sidebarBackdrop').classList.toggle('visible', open);
     }
-    function setSidebarCollapsed(collapsed) {
-      localStorage.setItem(SIDEBAR_KEY, collapsed ? 'true' : 'false');
+    function setSidebarOpen(open) {
+      localStorage.setItem(SIDEBAR_KEY, open ? 'open' : 'closed');
       applySidebarState();
     }
     applySidebarState();
 
-    document.getElementById('sidebarCollapseBtn').addEventListener('click', () => setSidebarCollapsed(true));
-    document.getElementById('sidebarRevealBtn').addEventListener('click', () => setSidebarCollapsed(false));
-    // Clicking any real nav link collapses the sidebar (persists into the next page too)
+    document.getElementById('sidebarOpenBtn').addEventListener('click', () => setSidebarOpen(true));
+    document.getElementById('sidebarCollapseBtn').addEventListener('click', () => setSidebarOpen(false));
+    document.getElementById('sidebarBackdrop').addEventListener('click', () => setSidebarOpen(false));
+    // Clicking any real nav link closes the drawer (it persists closed into the next page too)
     document.querySelectorAll('#sidebarAside [data-sidebar-nav]').forEach(link => {
-      link.addEventListener('click', () => setSidebarCollapsed(true));
+      link.addEventListener('click', () => setSidebarOpen(false));
     });
 
     // ---------- TIMEOUT GUARD (prevents infinite "Loading…" if a network call truly hangs) ----------
