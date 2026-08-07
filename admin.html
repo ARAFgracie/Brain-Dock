@@ -225,7 +225,14 @@
           passError.classList.remove('hidden');
           return;
         }
-        const { data: profile } = await supabaseClient.from('profiles').select('is_admin').eq('id', session.user.id).single();
+        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+        if (userError || !user) {
+          await supabaseClient.auth.signOut();
+          passError.textContent = 'Your session has expired. Please log in again.';
+          passError.classList.remove('hidden');
+          return;
+        }
+        const { data: profile } = await supabaseClient.from('profiles').select('is_admin').eq('id', user.id).single();
         if (!profile?.is_admin) {
           passError.textContent = 'Access Denied. Your account is not an admin.';
           passError.classList.remove('hidden');

@@ -114,7 +114,14 @@
     (async () => {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (!session) { window.location.href = 'login.html'; return; }
-      currentUser = session.user;
+
+      const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+      if (userError || !user) {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'login.html';
+        return;
+      }
+      currentUser = user;
 
       const noteId = getNoteIdFromUrl();
       if (!noteId) { showNotFound(); return; }

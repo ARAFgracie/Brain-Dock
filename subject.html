@@ -302,7 +302,14 @@
         const { data: { session }, error: sessionError } = await withTimeout(supabaseClient.auth.getSession(), 8000, 'Session check');
         if (sessionError) { showFatalError('Session check failed', sessionError); return; }
         if (!session) { window.location.href = 'login.html'; return; }
-        currentUser = session.user;
+
+        const { data: { user }, error: userError } = await withTimeout(supabaseClient.auth.getUser(), 8000, 'Account verification');
+        if (userError || !user) {
+          await supabaseClient.auth.signOut();
+          window.location.href = 'login.html';
+          return;
+        }
+        currentUser = user;
 
         let { data: profile, error: profileError } = await withTimeout(
           supabaseClient.from('profiles').select('full_name, is_suspended').eq('id', currentUser.id).maybeSingle(),
