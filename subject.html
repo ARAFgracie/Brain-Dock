@@ -304,11 +304,29 @@
         if (!session) { window.location.href = 'login.html'; return; }
         currentUser = session.user;
 
-        const { data: profile, error: profileError } = await withTimeout(
-          supabaseClient.from('profiles').select('full_name, is_suspended').eq('id', currentUser.id).single(),
+        let { data: profile, error: profileError } = await withTimeout(
+          supabaseClient.from('profiles').select('full_name, is_suspended').eq('id', currentUser.id).maybeSingle(),
           8000, 'Profile fetch'
         );
         if (profileError) { showFatalError('Could not load your profile', profileError); }
+
+        if (!profile) {
+          const meta = currentUser.user_metadata || {};
+          const { data: healed, error: healError } = await supabaseClient
+            .from('profiles')
+            .upsert({
+              id: currentUser.id,
+              full_name: meta.full_name || 'Student',
+              phone: meta.phone || null,
+              class: meta.class || null,
+              gender: meta.gender || null,
+              contact_email: meta.contact_email || null,
+            })
+            .select('full_name, is_suspended')
+            .maybeSingle();
+          if (healError) { showFatalError('Could not repair your profile', healError); }
+          profile = healed;
+        }
 
         if (profile?.is_suspended) {
           await supabaseClient.auth.signOut();
