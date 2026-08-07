@@ -30,6 +30,8 @@
 <style>
   html { scroll-behavior: smooth; }
   body { background-color: #F8FAFC; overflow-x: hidden; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
   /* Wave divider — the dock's waterline */
   .waterline {
@@ -268,17 +270,58 @@
     </div>
   </section>
 
-  <!-- ============ FOOTER ============ -->
-  <footer class="bg-white border-t border-slate-200 py-10">
-    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-      <p class="font-display font-700 text-ink">Pi<span class="text-primary">cell</span></p>
-      <p class="text-sm text-slate-500">© 2026 Picell. Where knowledge anchors.</p>
-      <div class="flex items-center gap-5 text-sm text-slate-500">
-        <a href="#subjects" class="hover:text-primary transition-colors">Subjects</a>
-        <a href="login.html" class="hover:text-primary transition-colors">Get Started</a>
+  <!-- ============ FOOTER — subject bookshelf ============ -->
+  <footer class="bg-ink pt-16 pb-10 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-10">
+        <p class="text-xs font-semibold tracking-wide uppercase text-secondary mb-2">The shelf</p>
+        <h2 class="font-display font-700 text-2xl md:text-3xl text-white">Every subject, ready to open</h2>
+      </div>
+
+      <!-- Book row -->
+      <div class="flex gap-5 overflow-x-auto pb-6 px-1 snap-x snap-mandatory scrollbar-none" id="bookShelf"></div>
+
+      <!-- Shelf ledge -->
+      <div class="h-3 bg-gradient-to-b from-slate-700 to-slate-800 rounded-full mb-10"></div>
+
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-800">
+        <p class="font-display font-700 text-white pt-6 md:pt-0">Pi<span class="text-secondary">cell</span></p>
+        <p class="text-sm text-slate-400 pt-0 md:pt-0">© 2026 Picell. Where knowledge anchors.</p>
+        <div class="flex items-center gap-5 text-sm text-slate-400">
+          <a href="#subjects" class="hover:text-white transition-colors">Subjects</a>
+          <a href="login.html" class="hover:text-white transition-colors">Get Started</a>
+        </div>
       </div>
     </div>
   </footer>
+
+  <script>
+    const FOOTER_BOOKS = [
+      { subject: 'Physics', tagline: 'F = ma', desc: 'Mechanics, waves, and the laws that govern motion.', color: '#2563EB' },
+      { subject: 'Mathematics', tagline: 'a² + b² = c²', desc: 'Algebra, calculus, and problem-solving fundamentals.', color: '#14B8A6' },
+      { subject: 'Chemistry', tagline: 'H₂O', desc: 'Reactions, compounds, and the building blocks of matter.', color: '#F59E0B' },
+      { subject: 'Biology', tagline: 'DNA → RNA → Protein', desc: 'Cells, systems, and the science of life.', color: '#1E40AF' },
+      { subject: 'ICT', tagline: '<html>', desc: 'Programming, networks, and digital literacy.', color: '#0F766E' },
+      { subject: 'Accounting', tagline: 'Debit = Credit', desc: 'Ledgers, balance sheets, and financial fundamentals.', color: '#B45309' },
+    ];
+
+    const shelf = document.getElementById('bookShelf');
+    FOOTER_BOOKS.forEach(book => {
+      const card = document.createElement('a');
+      card.href = `dashboard.html?subject=${encodeURIComponent(book.subject)}`;
+      card.className = 'snap-start shrink-0 w-44 rounded-xl overflow-hidden shadow-lg hover:-translate-y-1.5 transition-transform duration-200 bg-white';
+      card.innerHTML = `
+        <div class="h-44 flex flex-col justify-between p-4" style="background-color:${book.color}">
+          <span class="font-display font-700 text-white text-lg leading-tight">${book.subject}</span>
+          <span class="font-display text-white/80 text-sm">${book.tagline}</span>
+        </div>
+        <div class="p-4">
+          <p class="text-xs text-slate-500 leading-relaxed">${book.desc}</p>
+        </div>
+      `;
+      shelf.appendChild(card);
+    });
+  </script>
 
   <script>
     // Subjects data — rendered as "berth" cards
