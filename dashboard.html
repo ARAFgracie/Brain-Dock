@@ -37,6 +37,8 @@
   @keyframes shimmer { 0%{background-position:100% 50%;} 100%{background-position:0 50%;} }
 
   :focus-visible { outline: 2px solid #14B8A6; outline-offset: 2px; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
   /* Subject chip hover-preview tooltip */
   .chip-tooltip {
@@ -71,7 +73,7 @@
           <path d="M5 13C5 13 6.5 19 12 19C17.5 19 19 13 19 13" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
           <path d="M2 13H22" stroke="#14B8A6" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <span>Pi<span class="text-primary">cell</span></span>
+        <span>Pi<span class="text-secondary">cell</span></span>
       </a>
       <button id="sidebarCollapseBtn" title="Close menu" aria-label="Close menu"
         class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-ink transition-colors shrink-0">
@@ -234,11 +236,56 @@
     </div>
   </main>
 
-  <footer class="bg-white border-t border-slate-200 py-8 mt-8">
-    <div class="max-w-7xl mx-auto px-6 text-center text-sm text-slate-500">
-      © 2026 Picell. Where knowledge anchors.
+  <!-- ============ FOOTER — subject bookshelf ============ -->
+  <footer class="bg-ink pt-16 pb-10 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-10">
+        <p class="text-xs font-semibold tracking-wide uppercase text-secondary mb-2">The shelf</p>
+        <h2 class="font-display font-700 text-2xl md:text-3xl text-white">Every subject, ready to open</h2>
+      </div>
+
+      <div class="flex gap-5 overflow-x-auto pb-6 px-1 snap-x snap-mandatory scrollbar-none" id="bookShelf"></div>
+
+      <div class="h-3 bg-gradient-to-b from-slate-700 to-slate-800 rounded-full mb-10"></div>
+
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-800">
+        <p class="font-display font-700 text-white pt-6 md:pt-0">Pi<span class="text-secondary">cell</span></p>
+        <p class="text-sm text-slate-400">© 2026 Picell. Where knowledge anchors.</p>
+        <div class="flex items-center gap-5 text-sm text-slate-400">
+          <a href="index.html" class="hover:text-white transition-colors">Home</a>
+          <a href="subject.html" class="hover:text-white transition-colors">Browse</a>
+        </div>
+      </div>
     </div>
   </footer>
+
+  <script>
+    const FOOTER_BOOKS = [
+      { subject: 'Physics', tagline: 'The universe, in equations.', desc: 'Mechanics, waves, and the laws that govern motion.', color: '#2563EB' },
+      { subject: 'Mathematics', tagline: 'The language every science speaks.', desc: 'Algebra, calculus, and problem-solving fundamentals.', color: '#14B8A6' },
+      { subject: 'Chemistry', tagline: 'Where atoms tell their own stories.', desc: 'Reactions, compounds, and the building blocks of matter.', color: '#F59E0B' },
+      { subject: 'Biology', tagline: 'Life, mapped cell by cell.', desc: 'Cells, systems, and the science of life.', color: '#1E40AF' },
+      { subject: 'ICT', tagline: 'Code is the new literacy.', desc: 'Programming, networks, and digital literacy.', color: '#0F766E' },
+      { subject: 'Accounting', tagline: 'The numbers that keep businesses honest.', desc: 'Ledgers, balance sheets, and financial fundamentals.', color: '#B45309' },
+    ];
+
+    const footerShelf = document.getElementById('bookShelf');
+    FOOTER_BOOKS.forEach(book => {
+      const card = document.createElement('a');
+      card.href = `subject.html?subject=${encodeURIComponent(book.subject)}`;
+      card.className = 'snap-start shrink-0 w-44 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-5 transition-all duration-300 bg-white';
+      card.innerHTML = `
+        <div class="h-44 flex flex-col justify-between p-4" style="background-color:${book.color}">
+          <span class="font-display font-700 text-white text-lg leading-tight">${book.subject}</span>
+          <span class="font-display text-white/80 text-sm italic leading-snug">${book.tagline}</span>
+        </div>
+        <div class="p-4">
+          <p class="text-xs text-slate-500 leading-relaxed">${book.desc}</p>
+        </div>
+      `;
+      footerShelf.appendChild(card);
+    });
+  </script>
 
   <script>
     // Picell — Supabase client config (inlined so it never depends on a separate file/folder upload)

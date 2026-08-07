@@ -110,7 +110,7 @@
           <path d="M5 13C5 13 6.5 19 12 19C17.5 19 19 13 19 13" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
           <path d="M2 13H22" stroke="#14B8A6" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <span class="text-ink">Pi<span class="text-primary">cell</span></span>
+        <span class="text-ink">Pi<span class="text-secondary">cell</span></span>
       </a>
       <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
         <a href="#subjects" class="hover:text-primary transition-colors">Subjects</a>
@@ -140,7 +140,7 @@
         </p>
 
         <!-- Search bar as the hero's centerpiece action -->
-        <form class="mt-8 flex flex-wrap items-center gap-2 bg-white rounded-full shadow-sm border border-slate-200 p-2 max-w-md" onsubmit="event.preventDefault(); window.location.href='dashboard.html';">
+        <form class="mt-8 flex flex-wrap items-center gap-2 bg-white rounded-full shadow-sm border border-slate-200 p-2 max-w-md" onsubmit="event.preventDefault(); window.location.href='login.html';">
           <svg class="ml-3 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
           <input type="text" placeholder="Search notes, subjects, keywords…" class="min-w-0 flex-1 outline-none text-sm bg-transparent placeholder:text-slate-400" />
           <button type="submit" class="anchor-cta shrink-0 bg-ink text-white text-sm font-semibold px-5 py-2.5 rounded-full flex items-center gap-2 hover:bg-slate-800 transition-colors">
@@ -297,23 +297,23 @@
 
   <script>
     const FOOTER_BOOKS = [
-      { subject: 'Physics', tagline: 'F = ma', desc: 'Mechanics, waves, and the laws that govern motion.', color: '#2563EB' },
-      { subject: 'Mathematics', tagline: 'a² + b² = c²', desc: 'Algebra, calculus, and problem-solving fundamentals.', color: '#14B8A6' },
-      { subject: 'Chemistry', tagline: 'H₂O', desc: 'Reactions, compounds, and the building blocks of matter.', color: '#F59E0B' },
-      { subject: 'Biology', tagline: 'DNA → RNA → Protein', desc: 'Cells, systems, and the science of life.', color: '#1E40AF' },
-      { subject: 'ICT', tagline: '<html>', desc: 'Programming, networks, and digital literacy.', color: '#0F766E' },
-      { subject: 'Accounting', tagline: 'Debit = Credit', desc: 'Ledgers, balance sheets, and financial fundamentals.', color: '#B45309' },
+      { subject: 'Physics', tagline: 'The universe, in equations.', desc: 'Mechanics, waves, and the laws that govern motion.', color: '#2563EB' },
+      { subject: 'Mathematics', tagline: 'The language every science speaks.', desc: 'Algebra, calculus, and problem-solving fundamentals.', color: '#14B8A6' },
+      { subject: 'Chemistry', tagline: 'Where atoms tell their own stories.', desc: 'Reactions, compounds, and the building blocks of matter.', color: '#F59E0B' },
+      { subject: 'Biology', tagline: 'Life, mapped cell by cell.', desc: 'Cells, systems, and the science of life.', color: '#1E40AF' },
+      { subject: 'ICT', tagline: 'Code is the new literacy.', desc: 'Programming, networks, and digital literacy.', color: '#0F766E' },
+      { subject: 'Accounting', tagline: 'The numbers that keep businesses honest.', desc: 'Ledgers, balance sheets, and financial fundamentals.', color: '#B45309' },
     ];
 
     const shelf = document.getElementById('bookShelf');
     FOOTER_BOOKS.forEach(book => {
       const card = document.createElement('a');
-      card.href = `dashboard.html?subject=${encodeURIComponent(book.subject)}`;
-      card.className = 'snap-start shrink-0 w-44 rounded-xl overflow-hidden shadow-lg hover:-translate-y-1.5 transition-transform duration-200 bg-white';
+      card.href = 'login.html';
+      card.className = 'snap-start shrink-0 w-44 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-5 transition-all duration-300 bg-white';
       card.innerHTML = `
         <div class="h-44 flex flex-col justify-between p-4" style="background-color:${book.color}">
           <span class="font-display font-700 text-white text-lg leading-tight">${book.subject}</span>
-          <span class="font-display text-white/80 text-sm">${book.tagline}</span>
+          <span class="font-display text-white/80 text-sm italic leading-snug">${book.tagline}</span>
         </div>
         <div class="p-4">
           <p class="text-xs text-slate-500 leading-relaxed">${book.desc}</p>
