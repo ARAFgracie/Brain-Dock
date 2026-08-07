@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Note — BrainDock</title>
+<title>Note — Picell</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -41,7 +41,7 @@
           <path d="M5 13C5 13 6.5 19 12 19C17.5 19 19 13 19 13" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
           <path d="M2 13H22" stroke="#14B8A6" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <span>Brain<span class="text-primary">Dock</span></span>
+        <span>Pi<span class="text-primary">cell</span></span>
       </a>
       <a href="dashboard.html" class="text-sm text-slate-500 hover:text-primary transition-colors flex items-center gap-1.5">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
@@ -96,7 +96,7 @@
   </main>
 
   <script>
-    // BrainDock — Supabase client config (inlined so it never depends on a separate file/folder upload)
+    // Picell — Supabase client config (inlined so it never depends on a separate file/folder upload)
     const SUPABASE_URL = 'https://hdfphesajupqphnbmjod.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_NVkl8mcfd5Qxow-9t39sPA_OPQAcEQo';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -142,7 +142,7 @@
       document.getElementById('loadingState').classList.add('hidden');
       document.getElementById('noteContent').classList.remove('hidden');
 
-      document.title = `${currentNote.title} — BrainDock`;
+      document.title = `${currentNote.title} — Picell`;
       document.getElementById('noteSubject').textContent = currentNote.subject;
       document.getElementById('noteTitle').textContent = currentNote.title;
       document.getElementById('noteDescription').textContent = currentNote.description || 'No description provided.';
